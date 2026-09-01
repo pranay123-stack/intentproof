@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ButtonLink, Callout, PageHeader, Panel, Prose, SectionLabel } from '@/components/ui';
+import { GITHUB_URL } from '@/lib/links';
 
 export const metadata: Metadata = {
   title: 'About',
@@ -8,7 +9,6 @@ export const metadata: Metadata = {
 };
 
 export default function AboutPage() {
-  const github = process.env.NEXT_PUBLIC_GITHUB_URL ?? 'https://github.com';
   return (
     <>
       <PageHeader
@@ -126,7 +126,7 @@ export default function AboutPage() {
               Run the demo
             </ButtonLink>
             <ButtonLink href="/docs/security-model">Security model</ButtonLink>
-            <ButtonLink href={github} external>
+            <ButtonLink href={GITHUB_URL} external>
               Source ↗
             </ButtonLink>
           </div>
@@ -134,7 +134,7 @@ export default function AboutPage() {
             <p className="text-[13px] leading-relaxed text-text-dim">
               Built by{' '}
               <Link
-                href={github}
+                href={GITHUB_URL}
                 className="text-accent underline decoration-accent-dim underline-offset-2"
               >
                 pranay123-stack

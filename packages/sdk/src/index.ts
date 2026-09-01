@@ -45,6 +45,7 @@ export {
   EMPTY_LEDGER,
   PolicyEngine,
   applyToLedger,
+  dayIndex,
   evaluateAction,
   ledgerFromHistory,
   replayReceipt,

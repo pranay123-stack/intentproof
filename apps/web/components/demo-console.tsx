@@ -7,6 +7,7 @@ import type {
   IntentPolicy,
   PolicyCheck,
 } from '@intentproof/intent-schema';
+import { computeIntentHash } from '@intentproof/intent-schema';
 import Link from 'next/link';
 import { useCallback, useMemo, useState } from 'react';
 import { shortHash, timestamp, usd } from '@/lib/format';
@@ -337,6 +338,18 @@ export function DemoConsole({ localMode }: { localMode: boolean }) {
     setError(null);
   };
 
+  // The hash of what is *about to be committed*, which is the draft after any
+  // edits — not the one the compiler originally returned. Showing the stale value
+  // here would undercut the exact claim the screen is making.
+  const draftHash = useMemo(() => {
+    if (!draft) return null;
+    try {
+      return computeIntentHash(draft);
+    } catch {
+      return null;
+    }
+  }, [draft]);
+
   const summary = run?.summary;
   const allVerified = useMemo(
     () => verifications?.every((v) => v.findings.every((f) => f.passed !== false)) ?? false,
@@ -473,8 +486,13 @@ export function DemoConsole({ localMode }: { localMode: boolean }) {
             <button type="button" onClick={reset} className={buttonClass.ghost}>
               Reject
             </button>
-            <span className="ml-auto hash text-text-faint">
-              {shortHash(compiled.preview.intentHash, 14, 8)}
+            <span className="ml-auto flex items-baseline gap-2">
+              <span className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-text-faint">
+                will commit
+              </span>
+              <span className="hash text-text-dim" aria-live="polite">
+                {draftHash ? shortHash(draftHash, 14, 8) : 'invalid policy'}
+              </span>
             </span>
           </div>
         </div>

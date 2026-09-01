@@ -3,11 +3,11 @@ import { DemoConsole } from '@/components/demo-console';
 import { ModeBanner } from '@/components/mode-banner';
 import { CORE_PIPELINE, Pipeline } from '@/components/pipeline';
 import { Badge, ButtonLink, Panel, SectionLabel } from '@/components/ui';
+import { GITHUB_URL } from '@/lib/links';
 import { runtimeStatus } from '@/lib/server';
 
 export default function HomePage() {
   const status = runtimeStatus();
-  const github = process.env.NEXT_PUBLIC_GITHUB_URL ?? 'https://github.com';
 
   return (
     <>
@@ -32,7 +32,7 @@ export default function HomePage() {
               Try live demo
             </ButtonLink>
             <ButtonLink href="/architecture">View architecture</ButtonLink>
-            <ButtonLink href={github} external>
+            <ButtonLink href={GITHUB_URL} external>
               GitHub ↗
             </ButtonLink>
           </div>

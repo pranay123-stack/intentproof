@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { intentDisplayNumber, intentStatus } from '@intentproof/sdk';
+import { dayIndex, intentDisplayNumber, intentStatus } from '@intentproof/sdk';
 import { IntentActions } from '@/components/intent-actions';
 import { PolicyView } from '@/components/policy-view';
 import {
@@ -41,7 +41,13 @@ export default async function IntentPage({ params }: { params: Promise<{ id: str
   const status = intentStatus(intent);
   const allowed = receipts.filter((r) => r.policyResult === 'ALLOWED');
   const rejected = receipts.filter((r) => r.policyResult === 'REJECTED');
-  const spent = allowed.reduce((sum, r) => sum + r.action.valueUsd, 0);
+  // Only receipts from the current UTC day count, matching the bucket the engine
+  // and the contract both use. Summing every allowed receipt ever would show a
+  // number the policy never enforced.
+  const today = dayIndex(new Date());
+  const spentToday = allowed
+    .filter((r) => dayIndex(new Date(r.timestamp)) === today)
+    .reduce((sum, r) => sum + r.action.valueUsd, 0);
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-10">
@@ -200,19 +206,20 @@ export default async function IntentPage({ params }: { params: Promise<{ id: str
           <Panel className="p-4">
             <SectionLabel>Budget used today</SectionLabel>
             <p className="mt-2 font-mono text-xl text-text">
-              {usd(spent)}
+              {usd(spentToday)}
               <span className="text-text-faint"> / {usd(intent.policy.maxDailySpendUsd)}</span>
             </p>
             <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-panel-2">
               <div
                 className="h-full bg-accent"
                 style={{
-                  width: `${Math.min(100, (spent / (intent.policy.maxDailySpendUsd || 1)) * 100)}%`,
+                  width: `${Math.min(100, (spentToday / (intent.policy.maxDailySpendUsd || 1)) * 100)}%`,
                 }}
               />
             </div>
             <p className="mt-2 text-[12px] leading-relaxed text-text-dim">
-              Only allowed actions consume budget. Rejections cost nothing.
+              Counted over the current UTC day, the same bucket the engine and the contract use.
+              Only allowed actions consume budget; rejections cost nothing.
             </p>
           </Panel>
 

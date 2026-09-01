@@ -68,6 +68,9 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+          # scripts/sync-abi.mjs uses only Node builtins, so this job needs no
+          # package manager and must not try to prime a pnpm cache.
+          package-manager-cache: false
 
       - run: scarb build
         working-directory: contracts

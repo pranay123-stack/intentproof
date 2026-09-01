@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import Link from 'next/link';
 import './globals.css';
 import { ModeBanner } from '@/components/mode-banner';
+import { GITHUB_URL } from '@/lib/links';
 
 export const metadata: Metadata = {
   title: {
@@ -126,7 +127,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   </Link>
                   <a
                     className="hover:text-text"
-                    href={process.env.NEXT_PUBLIC_GITHUB_URL ?? 'https://github.com'}
+                    href={GITHUB_URL}
                     target="_blank"
                     rel="noreferrer noopener"
                   >
