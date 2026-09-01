@@ -7,7 +7,8 @@ Adversarial review of the security model is the most useful thing you can bring.
 ```bash
 pnpm install
 pnpm build:packages
-pnpm verify          # lint + typecheck + both test suites + production build
+pnpm verify          # lint + typecheck + both test suites
+pnpm demo            # the whole pipeline end to end
 ```
 
 Node 22+ and pnpm are required. Cairo work also needs scarb 2.20 and snforge 0.63.
@@ -25,6 +26,9 @@ Node 22+ and pnpm are required. Cairo work also needs scarb 2.20 and snforge 0.6
 - **A test that makes a network request.** The OpenAI compiler is exercised through an
   injected client stub. A suite that depends on a live model is neither deterministic nor
   runnable in CI, and it tests OpenAI rather than IntentProof.
+- **Breaking `pnpm demo` or `pnpm verify:receipt`.** CI runs both with no secrets at all,
+  because LOCAL DEMO MODE has to stay a working configuration rather than a claim in a
+  README.
 
 ## Things to be careful about
 
@@ -38,6 +42,9 @@ Node 22+ and pnpm are required. Cairo work also needs scarb 2.20 and snforge 0.6
   `address: null` on purpose; there is a test asserting it.
 - **Do not describe anything here as a proof.** It is a verifiable execution receipt until
   a real proof system exists.
+- **Keep the agent isolated from the engine.** `packages/agent` imports `intent-schema` and
+  nothing else. An agent that could reach the policy engine could shape its proposals to
+  pass, and the demo would stop being evidence of anything.
 
 ## Commit and PR style
 

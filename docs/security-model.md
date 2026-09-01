@@ -23,7 +23,9 @@ proposal has to pass:
 2. a semantic gate that refuses transfer permission without a destination allowlist,
    refuses missing spending limits, refuses expiries beyond 30 days and refuses protocol
    names that are not in the directory;
-3. a human who reads the interpretation on a screen that gives refusals the same visual
+3. a human who reads the interpretation before approving it. The SDK enforces that a
+   policy is approved before it is committed; it cannot enforce that a person read it, so
+   the approval screen is the integrator's to build — and it should give refusals the same
    weight as permissions.
 
 The system prompt does tell the model that the user's text is data rather than
@@ -41,11 +43,11 @@ and human review is fallible.
 **Attack.** The model misreads the mandate — allowing an action the user meant to forbid,
 or setting a limit an order of magnitude too high.
 
-**Mitigation.** Approval is mandatory and explicit. The review screen states every value
-in the units the user used and lists what the model had to assume. The **explanation is
-inside the commitment**, so a rationale cannot be swapped after the fact. Any limit can be
-edited before approval, and the hash visibly changes as it is edited — which is the point
-of showing it.
+**Mitigation.** Approval is mandatory and explicit. `CompileResult` carries the limits in
+the units the user used plus the assumptions the model had to make, so a review screen can
+show both. The **explanation is inside the commitment**, so a rationale cannot be swapped
+after the fact. Recomputing the hash as the user edits is cheap — `intent-schema` runs in a
+browser — and it is what makes an edit visibly change what is being committed.
 
 The expiry is computed **server-side from a duration**, never taken as an absolute
 timestamp from the model, because models are unreliable about the current date and a
@@ -175,28 +177,30 @@ change.
 **Attack.** The OpenAI key or the Starknet private key leaks through the browser bundle or
 a log.
 
-**Mitigation.** Both are read only in server-side code. Neither appears in a
-`NEXT_PUBLIC_*` variable, and the compiler module has no browser entry point. Compilation
-errors are written so they never echo the prompt or the model output, because those errors
-reach the browser — there is a test asserting that a phrase from the input does not appear
-in the error message. OpenAI requests set `store: false`. `.gitignore` excludes `.env*`.
+**Mitigation.** Both are read only in server-side code; the compiler is not safe to bundle
+for a browser and says so. Compilation errors are written so they never echo the prompt or
+the model output, because in a hosted integration those errors reach an end user — there is
+a test asserting that a phrase from the input does not appear in the error message. OpenAI
+requests set `store: false`. `.gitignore` excludes `.env*`.
 
-**Residual risk.** A deployment that puts a secret in a public variable defeats this.
-`.env.example` documents which names are safe to expose and which are not.
+**Residual risk.** An integrator who forwards the key to a client, or bundles the compiler
+into a browser build, defeats this entirely. `.env.example` documents what each variable is
+for.
 
 ---
 
 ## Denial of service
 
-**Attack.** Looping the compile endpoint to burn the operator's OpenAI budget.
+**Attack.** Looping the compiler to burn the operator's OpenAI budget.
 
-**Mitigation.** A per-instance token bucket on `/api/compile` (12 per minute per client)
-and on the write endpoints. Input is capped at 4,000 characters and generation at 2,000
-output tokens.
+**Mitigation.** Input is capped at 4,000 characters and rejected below 10; generation is
+capped at 2,000 output tokens. Compilation is the only operation in the system that costs
+money — enforcement, hashing and verification are all local and free, so an attacker
+flooding those achieves nothing.
 
-**Residual risk.** A serverless deployment runs many instances and this counts each
-separately, so it is not a substitute for a real gateway limit. It stops a single looping
-tab, which is the failure mode a public demo actually hits.
+**Residual risk.** Rate limiting is the integrator's responsibility. IntentProof is a
+library and has no request boundary of its own to meter; anyone exposing `compile()` over a
+network needs a limit in front of it.
 
 ---
 

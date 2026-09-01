@@ -13,9 +13,9 @@ export interface ScenarioStep {
  *
  * Seven steps: three inside the grant, four outside it, one per rejection rule
  * (forbidden action, unauthorized destination, unauthorized asset, oversized
- * transaction). The totals the UI shows are counted from the run, never written
- * down in advance — which is why this list is allowed to grow without anything
- * else needing to change.
+ * transaction). Totals are counted from the run, never written down in advance —
+ * which is why this list is allowed to grow without anything else needing to
+ * change.
  *
  * The order is not cosmetic. The two allowed swaps come first and use $770 of a
  * $1,000 daily budget, leaving enough headroom that the small rejections fail on

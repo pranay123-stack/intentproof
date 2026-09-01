@@ -76,11 +76,14 @@ implementation details.
 | Cairo contracts | `IntentRegistry`, `ExecutionVerifier`, reusable `policy` library, two-step `ownable` component |
 | Cairo tests | 59 passing (`snforge`) |
 | TypeScript packages | schema · compiler · policy engine · Starknet client · agent · SDK |
-| TypeScript tests | 137 passing (`vitest`) |
-| Web app | Next.js 16, 10 routes, 7 API endpoints, production build clean |
+| TypeScript tests | 127 passing (`vitest`) |
+| Distribution | Libraries and contracts, not an application — the integration point is one line in someone else's agent loop |
+| CLI | `pnpm demo` runs the whole pipeline; `pnpm verify:receipt` verifies a bundle independently |
 | Modes | LOCAL DEMO (no credentials) · Sepolia read-only · Sepolia read-write |
 
 ## The three-minute demo script
+
+Run in a terminal. Everything below is real output — no slides.
 
 **0:00 — The problem (25s)**
 
@@ -89,70 +92,91 @@ implementation details.
 > doesn't know you said *never use leverage*. And you can't fix that by asking the model
 > to check itself: the same component that misread you will misread you again."
 
-**0:25 — Compile (35s)**
+**0:25 — Run the pipeline (20s)**
 
-Open the homepage. The example is already in the box:
-
-> *Manage my Starknet portfolio. You may swap ETH and STRK. Never use leverage or
-> borrowing. Maximum transaction value is $500. Maximum daily spending is $1,000. Only
-> use approved DEXs. Authorization expires after 24 hours.*
-
-Press **Compile intent**.
-
-> "That went to OpenAI, which returned a structured proposal. Note what it can't do: the
-> action kinds are a closed enum, so it can't invent a permission. And the limits are
-> required — a policy without a spending cap is refused by the semantic gate before I ever
-> see it."
-
-**1:00 — Review and edit (30s)**
-
-Point at the amber banner. Press **Edit intent**, change the per-transaction cap.
-
-> "This is the part that matters. I read what it understood, and I can change it. Watch
-> the commitment at the bottom — it changes with every keystroke. That hash is what makes
-> a later edit detectable."
-
-Change it back. Press **Approve intent**.
-
-> "Canonicalized, hashed with Poseidon, registered. Sepolia when a registry is configured;
-> otherwise it says LOCAL DEMO MODE and shows no transaction, because there isn't one."
-
-**1:30 — Run the agent (45s)**
-
-Press **Run agent**.
-
-> "Seven proposals. The agent has no access to the policy engine — it can't see a verdict
-> before proposing, which is what makes this a test rather than a demo."
-
-Read the table:
-
-```
-swap ETH → STRK      $420     ✓ ALLOWED
-swap STRK → ETH      $350     ✓ ALLOWED
-borrow USDC        $2,000     ✗ REJECTED   forbidden action, unauthorized asset,
-                                            unapproved venue, over both caps
-transfer → 0x04b2…   $180     ✗ REJECTED   no destination allowlist at all
-swap ETH → DOGE      $120     ✗ REJECTED   asset not authorized
-swap ETH → STRK    $1,500     ✗ REJECTED   over the $500 per-transaction cap
-swap ETH → STRK      $200     ✓ ALLOWED
+```bash
+pnpm demo --emit bundle.json
 ```
 
-Expand the borrow row.
+> "One command. It compiles a mandate, commits it, runs an agent against it, and verifies
+> every receipt. Let me walk through what it just printed."
 
-> "Every check, and why. It doesn't stop at the first failure — a $2,000 borrow is wrong
-> in six ways and the receipt says all six."
+**0:45 — Compilation (30s)**
 
-**2:15 — Receipts and verification (35s)**
+```
+2 · Compiled to a structured policy
+  allowed      swap
+  forbidden    borrow, leverage, short
+  assets       ETH, STRK
+  max tx       $500
+  max daily    $1,000
+  source       gpt-5.6
+```
 
-Press **Inspect receipts**, then **Verify**.
+> "That went to OpenAI, which returned a structured proposal. Note what it *can't* do: the
+> action kinds are a closed enum, so it cannot invent a permission. And the limits are
+> required — a policy without a spending cap is refused by the semantic gate before a human
+> ever sees it. Note also that 'never use leverage' expanded to three forbidden actions.
+> That expansion is checked, not trusted."
 
-> "Every action produced a sealed receipt, including the refusals. What the agent *tried*
-> is as much a part of the record as what it did."
+**1:15 — Commitment (20s)**
 
-> "Verification recomputes everything: the commitment from the policy, the receipt hash
-> from the receipt, and then it re-runs the policy engine at each receipt's own timestamp.
-> Seven actions evaluated, three allowed, four rejected, **zero unauthorized
-> executions**."
+```
+3 · Committed
+  intent hash  0x0591f34eb279e1686d5fabe0302c1ced8c8723fe47b92d9837cac3176fdab5a5
+  recomputed   0x0591f34eb279e1686d5fabe0302c1ced8c8723fe47b92d9837cac3176fdab5a5
+  mode         LOCAL_DEMO
+  transaction  none — LOCAL DEMO MODE, nothing was broadcast
+```
+
+> "Canonicalized and hashed with Poseidon. The second line is the hash recomputed from the
+> stored policy — that's what makes a later edit detectable. On Sepolia the contract does
+> that recomputation itself rather than taking our word for it. Here there's no chain
+> configured, so it says so instead of inventing a transaction hash."
+
+**1:35 — Enforcement (50s)**
+
+```
+4 · The agent proposes; the engine decides
+  ✓ ALLOWED   Swap ETH → STRK, $420
+  ✓ ALLOWED   Swap STRK → ETH, $350
+  ✗ REJECTED  Borrow USDC, $2,000        action_allowed, action_not_forbidden,
+                                          asset_allowed, contract_allowed,
+                                          transaction_limit, daily_limit
+  ✗ REJECTED  Transfer to unknown address, $180
+  ✗ REJECTED  Swap ETH → DOGE, $120
+  ✗ REJECTED  Swap ETH → STRK, $1,500
+  ✓ ALLOWED   Swap ETH → STRK, $200
+```
+
+> "The agent has no access to the policy engine — it can't see a verdict before proposing,
+> which is what makes this a test rather than a demo. And the checks don't short-circuit: a
+> $2,000 borrow is wrong in six different ways and the receipt says all six."
+
+> "The last one matters too — it's an ordinary swap of an authorized pair on an approved
+> venue. It's rejected purely for size."
+
+**2:25 — Independent verification (25s)**
+
+```bash
+pnpm verify:receipt bundle.json
+```
+
+> "This is a separate program. It holds no database — it recomputes the commitment from
+> the policy, the receipt hash from the receipt, and re-runs the policy engine at each
+> receipt's own timestamp. Seven receipts, all reproduce."
+
+Then flip one `policyResult` from `REJECTED` to `ALLOWED` and run it again:
+
+```
+✗ EXECUTION NOT AUTHORIZED
+    Receipt integrity: the receipt has been altered since it was sealed.
+    Policy evaluation: receipt claims ALLOWED, but re-running the engine yields REJECTED.
+```
+
+> "It names the rule that failed. And notice the receipts *after* it fail too — claiming to
+> have spent budget you didn't changes the ledger every later receipt was evaluated
+> against. You can't forge one in isolation."
 
 **2:50 — The honest close (10s)**
 
@@ -162,17 +186,19 @@ Press **Inspect receipts**, then **Verify**.
 > membership, which is the shape that arithmetizes, so a proof layer is the next phase.
 > Claiming it today would undermine the whole point."
 
-### Optional 20-second follow-up: tamper detection
+### If asked "where does this get integrated?"
 
-On `/verify`, paste a receipt with `policyResult` flipped from `REJECTED` to `ALLOWED`.
+Three surfaces exist in the code:
 
-```
-EXECUTION NOT AUTHORIZED
-✗ Receipt integrity — the receipt has been altered since it was sealed.
-✗ Policy evaluation — receipt claims ALLOWED, but re-running the engine yields REJECTED.
-```
+1. **`IntentProof.checkPolicy(intent, action)`** — a pure function with no client, no
+   environment and no I/O. One line inside an existing agent loop, right before the signer.
+2. **`contracts/src/policy.cairo`** — pure Cairo with no storage and no caller checks. Any
+   Starknet contract can enforce the same rules without depending on our registry.
+3. **The registry itself** — so a third party can check an agent's authority, or a user can
+   audit an agent they did not build.
 
-> "It names the rule that failed. That's the deliverable."
+The honest caveat: no third-party integration exists yet, and lining one up would
+strengthen this application more than any additional code.
 
 ## Roadmap
 

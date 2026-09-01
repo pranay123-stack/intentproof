@@ -12,7 +12,7 @@ export interface CompilerEnvironment {
 
 export interface CompilerSelection {
   readonly compiler: IntentCompiler;
-  /** Why this compiler was chosen — rendered in the UI, not just logged. */
+  /** Why this compiler was chosen. Meant to be shown to the user, not only logged. */
   readonly reason: string;
 }
 

@@ -62,8 +62,9 @@ USER  ──plain language──▶  OpenAI  ──▶  IntentProposal
 | `sdk` | Facade over all of the above | all |
 
 `intent-schema` has no Node-only dependencies, so canonicalization and hashing run
-identically in a browser. That is what lets the policy editor recompute the commitment
-on every keystroke while the user edits.
+identically in a browser. An integrator building the approval screen can therefore
+recompute the commitment client-side on every edit, which is what makes "changing this
+limit changes what you are committing to" visible rather than asserted.
 
 ## The two-implementation problem
 
@@ -103,7 +104,7 @@ genuinely useful, and it is better than pretending the chain is unreachable.
 
 The third exists because reporting a locally-verified receipt as *proven* would be the
 single most misleading thing this system could do. Local demo mode always lands here, and
-the UI says so in words rather than with a colour.
+`pnpm verify:receipt` says so in words rather than leaving it to a colour.
 
 ## Where the guarantees stop
 

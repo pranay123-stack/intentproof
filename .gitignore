@@ -1,8 +1,5 @@
 node_modules/
 dist/
-.next/
-out/
-.turbo/
 coverage/
 *.tsbuildinfo
 
@@ -10,9 +7,6 @@ coverage/
 .env
 .env.local
 .env.*.local
-
-# local intent/receipt store (LOCAL DEMO MODE)
-.data/
 
 # Cairo build output
 contracts/target/

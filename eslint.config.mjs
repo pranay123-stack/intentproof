@@ -9,7 +9,6 @@ export default tseslint.config(
       '**/.next/**',
       '**/node_modules/**',
       'contracts/**',
-      'apps/web/**',
     ],
   },
   js.configs.recommended,

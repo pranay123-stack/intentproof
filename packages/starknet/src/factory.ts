@@ -10,6 +10,8 @@ export interface StarknetEnvironment {
   readonly STARKNET_ACCOUNT_ADDRESS?: string | undefined;
   readonly STARKNET_PRIVATE_KEY?: string | undefined;
   readonly INTENT_REGISTRY_ADDRESS?: string | undefined;
+  readonly STARKNET_NETWORK?: string | undefined;
+  /** Legacy name kept so an existing .env keeps working. */
   readonly NEXT_PUBLIC_STARKNET_NETWORK?: string | undefined;
 }
 
@@ -28,7 +30,7 @@ export interface RegistrySelection {
  * and it is better than pretending the chain is unreachable.
  */
 export function selectRegistryClient(env: StarknetEnvironment = process.env): RegistrySelection {
-  const network = resolveNetwork(env.NEXT_PUBLIC_STARKNET_NETWORK);
+  const network = resolveNetwork(env.STARKNET_NETWORK ?? env.NEXT_PUBLIC_STARKNET_NETWORK);
   const address = env.INTENT_REGISTRY_ADDRESS?.trim();
 
   if (!address) {

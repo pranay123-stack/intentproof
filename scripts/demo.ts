@@ -9,7 +9,7 @@
  * With OPENAI_API_KEY set it calls the model. Without one it uses the rule-based
  * compiler and says so.
  */
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -36,8 +36,14 @@ function loadDotEnv(): void {
   }
 }
 
+const args = process.argv.slice(2);
+const emitIndex = args.indexOf('--emit');
+/** Where to write an { intent, receipts } bundle for `pnpm verify:receipt`. */
+const emitPath = emitIndex === -1 ? null : (args[emitIndex + 1] ?? 'intentproof-bundle.json');
+if (emitIndex !== -1) args.splice(emitIndex, emitPath === args[emitIndex + 1] ? 2 : 1);
+
 const USER_WORDS =
-  process.argv.slice(2).join(' ') ||
+  args.join(' ') ||
   'Manage my portfolio. You can swap ETH and STRK. Do not use leverage. Do not spend more than $500 per transaction or $1,000 per day. Only use approved protocols. Expires in 24 hours.';
 
 const rule = (label: string): void => {
@@ -123,6 +129,11 @@ async function main(): Promise<void> {
     } else {
       console.log(`  \x1b[32m✓\x1b[0m ${receipt.receiptHash.slice(0, 22)}… ${report.verdict}`);
     }
+  }
+
+  if (emitPath) {
+    writeFileSync(emitPath, `${JSON.stringify({ intent, receipts }, null, 2)}\n`, 'utf8');
+    console.log(`\n  wrote ${emitPath} — check it with \`pnpm verify:receipt ${emitPath}\``);
   }
 
   const allowed = receipts.filter((r) => r.policyResult === 'ALLOWED');

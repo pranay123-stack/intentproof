@@ -31,9 +31,13 @@ jobs:
       - run: pnpm -r run typecheck
       - run: pnpm test
 
-      # The production build runs with no secrets on purpose: LOCAL DEMO MODE is a
+      # The end-to-end demo runs with no secrets on purpose: LOCAL DEMO MODE is a
       # supported configuration, not a degraded one, and CI is where that stays true.
-      - run: pnpm build:web
+      # It exits non-zero if any receipt fails to verify.
+      - run: node --experimental-strip-types scripts/demo.ts --emit /tmp/bundle.json
+
+      # And the bundle it produced has to survive independent verification.
+      - run: node --experimental-strip-types scripts/verify-receipt.ts /tmp/bundle.json
 
   cairo:
     name: Cairo

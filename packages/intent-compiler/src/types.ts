@@ -13,8 +13,8 @@ export interface CompilerProvenance {
   readonly requestId?: string;
   readonly usage?: { readonly inputTokens: number; readonly outputTokens: number };
   /**
-   * Set when the policy did not come from a language model, so the UI can say so
-   * rather than implying an AI interpreted the request.
+   * Set when the policy did not come from a language model, so an integrator can
+   * say so rather than implying an AI interpreted the request.
    */
   readonly isModelGenerated: boolean;
 }

@@ -65,8 +65,8 @@ function findRefusal(output: unknown): string | null {
  * it returns something plausible but wrong, the human review step is what
  * catches it.
  *
- * The API key is read from the environment on the server only. This module has
- * no browser entry point and the key never appears in a `NEXT_PUBLIC_*` name.
+ * The API key is read from the environment on the server only. This module is
+ * server-side by construction and the key must never be bundled for a browser.
  */
 export class OpenAIIntentCompiler implements IntentCompiler {
   readonly id = 'openai-intent-compiler';
@@ -109,7 +109,8 @@ export class OpenAIIntentCompiler implements IntentCompiler {
       response = await this.parseOnce(text, options.signal);
     } catch (error) {
       // Deliberately does not include the prompt or the model's text in the
-      // message: compilation errors surface to the browser and to logs.
+      // message: compilation errors reach logs and, in a hosted integration, the
+      // end user.
       const detail = error instanceof OpenAI.APIError ? `${error.status} ${error.name}` : 'request failed';
       throw new CompilationError('request', `The Intent Compiler could not reach OpenAI (${detail}).`);
     }

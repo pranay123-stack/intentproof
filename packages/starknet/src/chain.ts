@@ -219,7 +219,7 @@ export class StarknetRegistryClient implements RegistryClient {
     };
   }
 
-  /** Ask the chain to recompute a commitment. Used by the verification page. */
+  /** Ask the chain to recompute a commitment, for clients checking their own canonicalizer. */
   async computePolicyHash(canonical: string): Promise<string> {
     const raw = await this.#read.call('compute_policy_hash', [canonicalChunks(canonical)]);
     return toHex(raw);

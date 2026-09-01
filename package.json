@@ -3,26 +3,26 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Prove that autonomous agents did what humans actually authorized.",
+  "description": "Prove that autonomous agents did what humans actually authorized. Cairo contracts and a TypeScript SDK for Starknet.",
   "license": "MIT",
   "engines": {
     "node": ">=22.0.0"
   },
   "packageManager": "pnpm@9.15.9",
   "scripts": {
+    "build": "pnpm -r --filter \"./packages/**\" run build",
     "build:packages": "pnpm -r --filter \"./packages/**\" run build",
-    "build:web": "pnpm --filter @intentproof/web run build",
-    "build": "pnpm run build:packages && pnpm run build:web",
-    "dev": "pnpm run build:packages && pnpm --filter @intentproof/web run dev",
     "typecheck": "pnpm run build:packages && pnpm -r run typecheck",
-    "lint": "eslint . --max-warnings 0 && pnpm --filter @intentproof/web run lint",
+    "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:cairo": "cd contracts && snforge test",
     "build:cairo": "cd contracts && scarb build",
-    "verify": "pnpm run build:packages && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run test:cairo && pnpm run build:web",
+    "verify": "pnpm run build:packages && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run test:cairo",
     "demo": "pnpm run build:packages && node --experimental-strip-types scripts/demo.ts",
-    "deploy:sepolia": "pnpm run build:packages && node --experimental-strip-types scripts/deploy-sepolia.ts"
+    "verify:receipt": "pnpm run build:packages && node --experimental-strip-types scripts/verify-receipt.ts",
+    "deploy:sepolia": "pnpm run build:packages && node --experimental-strip-types scripts/deploy-sepolia.ts",
+    "sync-abi": "node scripts/sync-abi.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
