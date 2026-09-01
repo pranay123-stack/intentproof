@@ -185,7 +185,7 @@ hash    = poseidon_hash_span(chunks)     // Cairo, core::poseidon`}
         </section>
 
         <section>
-          <SectionLabel>Future work</SectionLabel>
+          <SectionLabel as="h2">Future work</SectionLabel>
           <Panel className="mt-3 p-5">
             <Prose>
               <p>

@@ -35,9 +35,24 @@ export function PanelHeader({
   );
 }
 
-export function SectionLabel({ children }: { children: ReactNode }) {
+/**
+ * Small uppercase label above a block.
+ *
+ * Where it is the section's only heading it should render as one — the styling
+ * is identical either way, and a section whose heading is a `<p>` is invisible
+ * to anyone navigating by headings.
+ */
+export function SectionLabel({
+  children,
+  as: Tag = 'p',
+}: {
+  children: ReactNode;
+  as?: 'p' | 'h2' | 'h3';
+}) {
   return (
-    <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-text-faint">{children}</p>
+    <Tag className="font-mono text-[11px] font-normal uppercase tracking-[0.18em] text-text-faint">
+      {children}
+    </Tag>
   );
 }
 

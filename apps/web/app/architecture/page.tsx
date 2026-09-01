@@ -57,7 +57,7 @@ export default function ArchitecturePage() {
 
           <div className="space-y-8">
             <section>
-              <SectionLabel>The critical trust boundary</SectionLabel>
+              <SectionLabel as="h2">The critical trust boundary</SectionLabel>
               <Prose>
                 <p className="mt-3">
                   The failure mode this system exists to prevent is subtle. It is not that a model
@@ -81,7 +81,7 @@ export default function ArchitecturePage() {
             </section>
 
             <section>
-              <SectionLabel>What Starknet contributes</SectionLabel>
+              <SectionLabel as="h2">What Starknet contributes</SectionLabel>
               <Prose>
                 <p className="mt-3">
                   A commitment stored only by the party being audited is not a commitment. Starknet
@@ -117,7 +117,7 @@ export default function ArchitecturePage() {
         </div>
 
         <section className="mt-14">
-          <SectionLabel>Repository layout</SectionLabel>
+          <SectionLabel as="h2">Repository layout</SectionLabel>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {LAYERS.map((layer) => (
               <Panel key={layer.name} className="p-4">
@@ -130,7 +130,7 @@ export default function ArchitecturePage() {
         </section>
 
         <section className="mt-14">
-          <SectionLabel>Read next</SectionLabel>
+          <SectionLabel as="h2">Read next</SectionLabel>
           <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-[13.5px]">
             <Link className="text-accent underline decoration-accent-dim underline-offset-2" href="/docs/protocol">
               Protocol: canonical form, hashing, receipts →

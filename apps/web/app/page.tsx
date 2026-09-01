@@ -96,7 +96,7 @@ export default function HomePage() {
 
       <section className="border-b border-line">
         <div className="mx-auto max-w-6xl px-5 py-14">
-          <SectionLabel>The path an instruction takes</SectionLabel>
+          <SectionLabel as="h2">The path an instruction takes</SectionLabel>
           <div className="mt-6 grid gap-8 lg:grid-cols-[24rem_minmax(0,1fr)] lg:items-start">
             <Pipeline nodes={CORE_PIPELINE} />
             <div className="space-y-5 text-[14.5px] leading-relaxed text-text-dim">
@@ -148,7 +148,7 @@ export default function HomePage() {
 
       <section>
         <div className="mx-auto max-w-6xl px-5 py-14">
-          <SectionLabel>What this is not</SectionLabel>
+          <SectionLabel as="h2">What this is not</SectionLabel>
           <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
               {
