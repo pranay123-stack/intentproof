@@ -1,0 +1,25 @@
+node_modules/
+dist/
+.next/
+out/
+.turbo/
+coverage/
+*.tsbuildinfo
+
+# secrets — never commit
+.env
+.env.local
+.env.*.local
+
+# local intent/receipt store (LOCAL DEMO MODE)
+.data/
+
+# Cairo build output
+contracts/target/
+contracts/.snfoundry_cache/
+
+# deployment records contain live addresses, keep them out of git by default
+deployments/*.json
+!deployments/.gitkeep
+
+.DS_Store

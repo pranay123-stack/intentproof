@@ -1,0 +1,21 @@
+{
+  "name": "@intentproof/starknet",
+  "version": "0.1.0",
+  "description": "Starknet IntentRegistry client, with an explicit local mode that never fabricates transactions.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" } },
+  "files": ["dist"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "sync-abi": "node ../../scripts/sync-abi.mjs"
+  },
+  "dependencies": {
+    "@intentproof/intent-schema": "workspace:*",
+    "starknet": "^10.0.2"
+  }
+}

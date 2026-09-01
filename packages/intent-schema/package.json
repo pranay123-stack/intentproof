@@ -1,0 +1,20 @@
+{
+  "name": "@intentproof/intent-schema",
+  "version": "0.1.0",
+  "description": "Intent policy schema, canonicalization and Poseidon commitments for IntentProof.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" } },
+  "files": ["dist"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@scure/starknet": "^2.4.0",
+    "zod": "^4.5.4"
+  }
+}

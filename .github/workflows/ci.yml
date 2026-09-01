@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typescript:
+    name: TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:packages
+      - run: pnpm lint
+      - run: pnpm -r run typecheck
+      - run: pnpm test
+
+      # The production build runs with no secrets on purpose: LOCAL DEMO MODE is a
+      # supported configuration, not a degraded one, and CI is where that stays true.
+      - run: pnpm build:web
+
+  cairo:
+    name: Cairo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: software-mansion/setup-scarb@v1
+        with:
+          scarb-version: 2.20.0
+
+      - uses: foundry-rs/setup-snfoundry@v4
+        with:
+          starknet-foundry-version: 0.63.0
+
+      - run: scarb build
+        working-directory: contracts
+
+      - run: snforge test
+        working-directory: contracts
+
+  abi-drift:
+    name: ABI in sync with contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: software-mansion/setup-scarb@v1
+        with:
+          scarb-version: 2.20.0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - run: scarb build
+        working-directory: contracts
+
+      # The checked-in ABI is generated source. If a contract's external interface
+      # changed without regenerating it, the client and the deployed class would
+      # silently disagree — so a diff here is a failure.
+      - run: node scripts/sync-abi.mjs
+      - name: Fail if the generated ABI is stale
+        run: git diff --exit-code -- packages/starknet/src/abi
