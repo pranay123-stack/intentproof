@@ -87,7 +87,10 @@ async function main(): Promise<void> {
   for (const warning of compiled.warnings) console.log(`  \x1b[33m⚠ ${warning}\x1b[0m`);
 
   rule('3 · Committed');
-  console.log('  In the web app a human approves here. This script approves on your behalf.');
+  console.log(
+    '  A real integration puts an explicit human approval here. This script approves\n' +
+      '  on your behalf so the pipeline runs unattended.',
+  );
   const { intent, anchor } = await sdk.authorize({ policy });
   console.log(`  intent hash  ${intent.intentHash}`);
   console.log(`  recomputed   ${computeIntentHash(intent.policy)}`);
